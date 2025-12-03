@@ -1,64 +1,88 @@
-# Project Blueprint: Expert-View SaaS
+# Blueprint du Projet : SaaS pour Cabinets d'Expertise
 
-## Overview
+## 1. Vue d'ensemble
 
-Expert-View is a SaaS platform designed for accounting firms, enabling them to conduct secure, geo-tagged video calls with their clients. The platform provides tools for recording, downloading, and managing these interactions, streamlining remote expertise and verification processes.
+L'objectif est de construire une application SaaS (Software as a Service) multi-tenant destinée aux cabinets d'expertise. La plateforme permettra de mener des expertises à distance via des appels vidéo sécurisés, d'enregistrer les sessions, de capturer la géolocalisation des participants et de gérer les dossiers de manière centralisée.
 
-## Core Features & Design
+## 2. Architecture Technique
 
-### Implemented Features
-*(This section will be filled as we develop the application)*
+- **Frontend :** Next.js (React) avec TypeScript et Tailwind CSS pour une interface moderne et réactive.
+- **Backend :** Des fonctions serverless (Next.js API Routes, ou Edge Functions) seront utilisées pour la logique métier côté serveur. Pour des tâches plus complexes, un serveur Node.js (Express ou NestJS) pourrait être envisagé.
+- **Base de données & Services :** Supabase sera notre "backend-as-a-service".
+    - **PostgreSQL :** Pour la persistance des données (cabinets, utilisateurs, RDV, etc.).
+    - **Auth :** Pour la gestion de l'authentification et des utilisateurs.
+    - **Storage :** Pour le stockage sécurisé des enregistrements vidéo.
+    - **Realtime :** Pour les notifications en temps réel dans l'application.
+- **Vidéo & WebRTC :** Jitsi Meet (auto-hébergé ou via leur service) sera utilisé pour les appels vidéo et l'enregistrement. `mediasoup` est une alternative plus complexe si nous avons besoin de plus de contrôle.
+- **Déploiement :** L'application sera conteneurisée avec Docker et déployée sur un VPS Linux (Ubuntu), avec Certbot pour la gestion des certificats SSL.
 
-*   **Initial Project Setup:**
-    *   Next.js with TypeScript.
-    *   Tailwind CSS for styling.
-    *   ESLint for code quality.
+## 3. Fonctionnalités
 
-### Style and Design
-*   **Theme:** Modern, professional, and trustworthy.
-*   **Color Palette:** Primary colors will be blues and greens, conveying trust and financial stability. Accent colors will be used for calls-to-action.
-*   **Typography:** Clean and readable sans-serif fonts.
-*   **Layout:** Responsive and mobile-first, ensuring a seamless experience on both desktop and mobile devices.
+### MVP (Produit Minimum Viable)
 
-## Development Plan: Current Request
+1.  **Authentification & Multi-tenancy :**
+    - Inscription et connexion des utilisateurs (experts).
+    - Création de comptes "cabinets" (tenants).
+    - Isolation des données entre les cabinets (Row Level Security dans Supabase).
+2.  **Création de RDV :**
+    - Un expert peut créer un nouveau RDV.
+    - Génération d'un lien unique pour l'appel vidéo.
+3.  **Session d'Expertise Vidéo :**
+    - Appel vidéo 1-to-1 via le lien généré.
+    - Demande de consentement pour l'enregistrement et la géolocalisation.
+    - Capture de la géolocalisation (coordonnées GPS) via l'API HTML5.
+4.  **Enregistrement & Stockage :**
+    - Enregistrement de la session vidéo.
+    - Upload automatique de l'enregistrement vers Supabase Storage, dans le bucket du cabinet.
+5.  **Tableau de Bord Cabinet :**
+    - Liste des RDV passés et à venir.
+    - Accès aux enregistrements vidéo et possibilité de les télécharger.
 
-The user wants to build a SaaS application for accounting firms with the following features:
--   Each firm gets an account.
--   Ability to send a video call link.
--   Video calls are geo-tagged.
--   Firms can download recordings.
--   Admin interface to manage firms and payments (manually).
+### Améliorations Post-MVP
 
-### Additional Feature Ideas
-*   Screen sharing during video calls.
-*   Secure file sharing.
-*   Timestamped notes during calls.
-*   A dashboard with call history and analytics.
-*   White-labeling for firms to use their own branding.
+- **Transcription Automatique :** Transcription du contenu des appels en texte, avec recherche.
+- **Widget d'Intégration :** Un `<iframe>` ou un plugin pour que les cabinets puissent intégrer la prise de RDV sur leur propre site.
+- **Synchronisation Calendrier :** Intégration avec Google Calendar et Outlook.
+- **Tags & Notes :** Possibilité d'ajouter des métadonnées (tags, notes) aux enregistrements.
+- **Mode Offline :** Prise de notes hors ligne avec synchronisation ultérieure.
+- **Interface d'Administration :** Gestion centralisée des cabinets, des paiements, et logs d'audit.
+- **Modèle Freemium :** Un plan gratuit avec des fonctionnalités de base et des plans payants pour des options avancées.
+- **Support Multi-langues :** Internationalisation de l'interface (FR, EN, AR).
 
-### Step 1: Create the Landing Page
+## 4. Plan de Développement (Tâches Itératives)
 
-**Goal:** Create a visually appealing and informative landing page to act as the entry point for the application.
+### Étape 1 : Initialisation et Authentification (3-4 jours)
 
-**Plan:**
-1.  **Create `blueprint.md`:** Create the blueprint file to document the project.
-2.  **Update `globals.css`:** Add some base styles and a background texture.
-3.  **Modify `layout.tsx`:** Update the root layout with metadata.
-4.  **Create a `components` folder:** To store reusable UI components.
-5.  **Create a `Header` component:** A navigation bar for the landing page.
-6.  **Design the `page.tsx` (Landing Page):**
-    *   **Hero Section:** A compelling headline, a brief description of the service, and a call-to-action button.
-    *   **Features Section:** An overview of the key features (video calls, GPS tagging, recordings).
-    *   **Footer:** With links and copyright information.
-7.  **Use free icons and images:** To make the page more visually appealing.
+- **Tâche 1.1 :** Nettoyer le projet existant et initialiser une nouvelle structure Next.js.
+- **Tâche 1.2 :** Configurer Supabase (projet, variables d'environnement).
+- **Tâche 1.3 :** Script SQL d'initialisation pour les tables `cabinets`, `users`, `profiles` avec RLS pour la multi-tenancy.
+- **Tâche 1.4 :** Créer les pages d'inscription (`/signup`) et de connexion (`/login`).
+- **Tâche 1.5 :** Implémenter la logique d'authentification côté client et serveur avec Supabase Auth.
+- **Tâche 1.6 :** Créer un dashboard de base (`/dashboard`) accessible uniquement aux utilisateurs connectés.
 
-### Step 2: Integrate Supabase and GitHub
+### Étape 2 : Gestion des RDV et Vidéo (4-5 jours)
 
-**Goal:** Set up the backend with Supabase and initialize a GitHub repository for version control.
+- **Tâche 2.1 :** Créer le modèle de données et l'API pour les `appointments`.
+- **Tâche 2.2 :** Sur le dashboard, ajouter un formulaire pour créer un RDV et générer un lien.
+- **Tâche 2.3 :** Créer une page dynamique `[appointmentId]` pour la session vidéo.
+- **Tâche 2.4 :** Intégrer Jitsi Meet dans cette page.
+- **Tâche 2.5 :** Mettre en place la capture de la géolocalisation avec consentement.
 
-**Plan:**
-1.  **Install Supabase CLI and initialize the project.**
-2.  **Install the Supabase JS library.**
-3.  **Set up environment variables for Supabase.**
-4.  **Initialize a Git repository.**
-5.  **Create a new repository on GitHub and push the initial code.**
+### Étape 3 : Enregistrement et Consultation (3-4 jours)
+
+- **Tâche 3.1 :** Configurer l'enregistrement des appels Jitsi.
+- **Tâche 3.2 :** Créer un script (côté serveur) pour uploader les enregistrements sur Supabase Storage.
+- **Tâche 3.3 :** Mettre à jour le dashboard pour lister les enregistrements et permettre leur téléchargement.
+- **Tâche 3.4 :** Créer un lecteur vidéo pour visualiser les enregistrements.
+
+### Étape 4 : Déploiement et Finalisation (2-3 jours)
+
+- **Tâche 4.1 :** Rédiger le guide de déploiement (Docker, `docker-compose.yml`).
+- **Tâche 4.2 :** Mettre en place la configuration pour Nginx et Certbot.
+- **Tâche 4.3 :** Rédiger un plan de test et une checklist de sécurité.
+
+---
+
+## Plan Actuel : Étape 1
+
+Je vais maintenant commencer la **Tâche 1.1**, qui consiste à nettoyer le projet actuel pour repartir sur des bases saines.
